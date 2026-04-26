@@ -7,10 +7,24 @@
                 <h4 class="tw-font-bold tw-flex tw-items-center tw-gap-2">
                     <i class="fa fa-plug"></i> API Data Builder Sample
                     <span class="label label-default" style="font-size:11px;">v1.0.0</span>
-                    <small class="text-muted tw-ml-2">Powered by Data Builder</small>
+                    <small class="text-muted tw-ml-2">Powered by <a href="https://codecanyon.net/item/data-builder-for-perfex-crm/62297963" target="_blank" style="color:inherit;text-decoration:underline dotted;">Data Builder &mdash; Visual Reporting, REST API &amp; GraphQL for Perfex CRM</a></small>
                 </h4>
                 <hr>
-            </div>
+
+                <!-- Module Intro Notice -->
+                <div class="alert alert-info" style="border-left:4px solid #3498db;background:#eaf4fc;margin-bottom:20px;">
+                    <div style="display:flex;align-items:flex-start;gap:12px;">
+                        <i class="fa fa-info-circle" style="font-size:22px;color:#3498db;margin-top:2px;"></i>
+                        <div>
+                            <strong style="font-size:13px;">About this module</strong>
+                            <p style="margin:6px 0 0;font-size:12.5px;line-height:1.7;color:#333;">
+                                <strong>API Data Builder Sample</strong> is a free, open-source companion module that demonstrates how to connect to and consume the <strong>REST API</strong> and <strong>GraphQL</strong> endpoints provided by <a href="https://codecanyon.net/item/data-builder-for-perfex-crm/62297963" target="_blank" style="color:#3498db;font-weight:600;">Data Builder &mdash; Visual Reporting, REST API &amp; GraphQL for Perfex CRM</a>.
+                                It provides interactive, working demos with live code examples that you can use as a blueprint for your own integrations.
+                                This module does <strong>not</strong> need to be installed on the same Perfex CRM instance as Data Builder &mdash; it can query any remote site running Data Builder via its API URL.
+                            </p>
+                        </div>
+                    </div>
+                </div>
         </div>
 
         <?php if (!$is_configured) { ?>

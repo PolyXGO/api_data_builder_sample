@@ -55,7 +55,7 @@ class Api_data_builder_sample_module
             $CI->app_menu->add_sidebar_menu_item(API_SAMPLE_MODULE, [
                 'name'     => 'API Samples',
                 'icon'     => 'fa fa-plug',
-                'position' => 45,
+                'position' => 8,
             ]);
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
