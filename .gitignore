@@ -1,0 +1,6 @@
+# Private credentials & notes
+_private_note/
+
+# HeraSpec agent files (internal development only)
+heraspec/
+AGENTS.heraspec.md
