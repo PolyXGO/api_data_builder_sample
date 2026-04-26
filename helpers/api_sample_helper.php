@@ -54,6 +54,7 @@ class ApiSampleClient
      */
     public function get(string $endpoint, array $params = []): array
     {
+        $endpoint = '/' . ltrim($endpoint, '/');
         $url = $this->base_url . $endpoint;
         if (!empty($params)) {
             $url .= '?' . http_build_query($params);
@@ -66,6 +67,7 @@ class ApiSampleClient
      */
     public function post(string $endpoint, array $data): array
     {
+        $endpoint = '/' . ltrim($endpoint, '/');
         $url  = $this->base_url . $endpoint;
         $body = json_encode($data);
         return $this->request('POST', $url, $body);
@@ -76,6 +78,7 @@ class ApiSampleClient
      */
     public function put(string $endpoint, array $data): array
     {
+        $endpoint = '/' . ltrim($endpoint, '/');
         $url  = $this->base_url . $endpoint;
         $body = json_encode($data);
         return $this->request('PUT', $url, $body);
@@ -86,6 +89,7 @@ class ApiSampleClient
      */
     public function delete(string $endpoint): array
     {
+        $endpoint = '/' . ltrim($endpoint, '/');
         $url = $this->base_url . $endpoint;
         return $this->request('DELETE', $url);
     }
