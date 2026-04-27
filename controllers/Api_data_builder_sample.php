@@ -90,7 +90,17 @@ class Api_data_builder_sample extends AdminController
 
     public function settings()
     {
+        // Demo restriction: non-primary admins cannot modify settings on demo sites
+        $_is_demo_site = file_exists(FCPATH . 'modules/demo_builder/demo_builder.php');
+        $_is_primary_admin = (int) get_staff_user_id() === 1;
+
         if ($this->input->is_ajax_request() && $this->input->post()) {
+            // Block save on demo site for non-primary admins
+            if ($_is_demo_site && !$_is_primary_admin) {
+                echo json_encode(['success' => false, 'message' => 'Settings are read-only on the demo site. Only the primary admin can modify them.']);
+                return;
+            }
+
             // Save settings
             $fields = ['api_sample_base_url', 'api_sample_api_token', 'api_sample_hmac_secret', 'api_sample_verify_ssl'];
             foreach ($fields as $key) {
@@ -107,7 +117,9 @@ class Api_data_builder_sample extends AdminController
         }
 
         $data = [
-            'title' => 'API Sample — Settings',
+            'title'            => 'API Sample — Settings',
+            'is_demo_site'     => $_is_demo_site,
+            'is_primary_admin' => $_is_primary_admin,
         ];
 
         $this->load->view('api_data_builder_sample/admin/settings', $data);
