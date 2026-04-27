@@ -1,5 +1,10 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
+<?php
+// Demo restriction: disable all fields for non-primary admins on demo sites
+$_api_disabled = !empty($is_demo_site) && empty($is_primary_admin);
+$_dis = $_api_disabled ? ' disabled' : '';
+?>
 <div id="wrapper">
     <div class="content">
         <div class="row">
@@ -12,12 +17,21 @@
                         </h4>
                         <hr class="hr-panel-heading">
 
+                        <?php if ($_api_disabled): ?>
+                        <div class="alert alert-warning" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                            <i class="fa fa-lock fa-lg"></i>
+                            <div>
+                                <strong>Read-only mode</strong> — All settings on this page are restricted on the demo site. Only the primary admin can modify them.
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <div id="settingsForm">
                             <div class="form-group">
                                 <label class="control-label">API Base URL <span class="text-danger">*</span></label>
                                 <input type="url" name="api_sample_base_url" class="form-control" id="apiBaseUrl"
                                        value="<?php echo htmlspecialchars(get_option('api_sample_base_url') ?: ''); ?>"
-                                       placeholder="https://your-crm.com">
+                                       placeholder="https://your-crm.com"<?php echo $_dis; ?>>
                                 <p class="help-block">The base URL of your Perfex CRM installation where Data Builder is installed.</p>
                             </div>
 
@@ -26,7 +40,7 @@
                                 <div class="input-group">
                                     <input type="password" name="api_sample_api_token" class="form-control" id="apiToken"
                                            value="<?php echo htmlspecialchars(get_option('api_sample_api_token') ?: ''); ?>"
-                                           placeholder="dba_xxxxxxxxxxxxxxxxxxxx">
+                                           placeholder="dba_xxxxxxxxxxxxxxxxxxxx"<?php echo $_dis; ?>>
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default" onclick="toggleTokenVisibility()" title="Toggle visibility">
                                             <i class="fa fa-eye" id="tokenToggleIcon"></i>
@@ -40,14 +54,14 @@
                                 <label class="control-label">HMAC Secret <small class="text-muted">(optional)</small></label>
                                 <input type="password" name="api_sample_hmac_secret" class="form-control" id="hmacSecret"
                                        value="<?php echo htmlspecialchars(get_option('api_sample_hmac_secret') ?: ''); ?>"
-                                       placeholder="Leave blank if HMAC is not enabled on the token">
+                                       placeholder="Leave blank if HMAC is not enabled on the token"<?php echo $_dis; ?>>
                                 <p class="help-block">If your API token has HMAC signing enabled, paste the HMAC secret here.</p>
                             </div>
 
                             <div class="form-group">
                                 <label>
                                     <input type="checkbox" name="api_sample_verify_ssl" id="verifySSL" value="1"
-                                        <?php echo get_option('api_sample_verify_ssl') ? 'checked' : ''; ?>>
+                                        <?php echo get_option('api_sample_verify_ssl') ? 'checked' : ''; ?><?php echo $_dis; ?>>
                                     Verify SSL Certificate
                                 </label>
                                 <p class="help-block text-warning">
@@ -60,9 +74,15 @@
 
                             <div class="row">
                                 <div class="col-md-6">
+                                 <?php if (!$_api_disabled): ?>
                                     <button type="button" class="btn btn-info" onclick="saveSettings()">
                                         <i class="fa fa-save"></i> Save Settings
                                     </button>
+                                 <?php else: ?>
+                                    <button type="button" class="btn btn-info" disabled>
+                                        <i class="fa fa-lock"></i> Save Settings
+                                    </button>
+                                 <?php endif; ?>
                                 </div>
                                 <div class="col-md-6 text-right">
                                     <button type="button" class="btn btn-success" onclick="testConnection()" id="btnTestConn">
