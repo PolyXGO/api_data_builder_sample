@@ -13,7 +13,7 @@ $_dis = $_api_disabled ? ' disabled' : '';
                     <div class="panel-body">
                         <h4 class="no-margin">
                             <i class="fa fa-cog"></i> API Connection Settings
-                            <small class="pull-right text-muted">API Data Builder Sample v1.0.0</small>
+                            <small class="pull-right text-muted">API Data Builder Sample</small>
                         </h4>
                         <hr class="hr-panel-heading">
 
@@ -21,7 +21,7 @@ $_dis = $_api_disabled ? ' disabled' : '';
                         <div class="alert alert-warning" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
                             <i class="fa fa-lock fa-lg"></i>
                             <div>
-                                <strong>Read-only mode</strong> — All settings on this page are restricted on the demo site. Only the primary admin can modify them.
+                                <strong>Read-only mode</strong> - All settings on this page are restricted on the demo site. Only the primary admin can modify them.
                             </div>
                         </div>
                         <?php endif; ?>
@@ -155,8 +155,8 @@ async function testConnection() {
         return;
     }
 
-    // Test with /api/v1/projects?per_page=1 as a simple connectivity probe
-    var endpoint = '/api/v1/projects?per_page=1';
+    // Test with /api/v1/auth/test (official token & scope verification endpoint)
+    var endpoint = '/api/v1/auth/test';
     var url = baseUrl + endpoint;
     var headers = {
         'Authorization': 'Bearer ' + token,
@@ -170,7 +170,7 @@ async function testConnection() {
         var bodyBytes = new TextEncoder().encode('');
         var bodyHashBuf = await crypto.subtle.digest('SHA-256', bodyBytes);
         var bodyHash = Array.from(new Uint8Array(bodyHashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        var canonical = ['GET', '/api/v1/projects', 'per_page=1', bodyHash, timestamp].join('\n');
+        var canonical = ['GET', '/api/v1/auth/test', '', bodyHash, timestamp].join('\n');
         var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(hmacSecret), {name: 'HMAC', hash: 'SHA-256'}, false, ['sign']);
         var sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(canonical));
         var signature = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');

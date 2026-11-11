@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * ApiSampleClient — HTTP client wrapper for Data Builder REST API & GraphQL.
+ * ApiSampleClient - HTTP client wrapper for Data Builder REST API & GraphQL.
  *
  * Handles:
  *   - Bearer token authentication
@@ -63,14 +63,23 @@ class ApiSampleClient
     }
 
     /**
-     * POST request.
+     * POST request (supports optional Idempotency-Key for safe write retries in v2.5.0+).
+     *
+     * @param  string      $endpoint        e.g. '/api/v1/invoices'
+     * @param  array       $data            JSON body payload
+     * @param  string|null $idempotency_key Optional unique key (UUID) for idempotent POST
+     * @param  array       $extra_headers   Optional extra HTTP headers
+     * @return array
      */
-    public function post(string $endpoint, array $data): array
+    public function post(string $endpoint, array $data, ?string $idempotency_key = null, array $extra_headers = []): array
     {
         $endpoint = '/' . ltrim($endpoint, '/');
         $url  = $this->base_url . $endpoint;
         $body = json_encode($data);
-        return $this->request('POST', $url, $body);
+        if (!empty($idempotency_key)) {
+            $extra_headers[] = 'Idempotency-Key: ' . $idempotency_key;
+        }
+        return $this->request('POST', $url, $body, $extra_headers);
     }
 
     /**
@@ -92,6 +101,69 @@ class ApiSampleClient
         $endpoint = '/' . ltrim($endpoint, '/');
         $url = $this->base_url . $endpoint;
         return $this->request('DELETE', $url);
+    }
+
+    // ─── Batch API & Report KPI (v2.5.0+) ────────────────────────────────
+
+    /**
+     * Execute multiple REST operations in a single request via POST /api/v1/batch.
+     *
+     * @param  array $operations Array of ['method' => 'GET|POST|PUT|DELETE', 'path' => '/api/v1/...', 'body' => [...]]
+     * @param  bool  $atomic     When true, rolls back the entire transaction if any operation fails
+     * @return array
+     */
+    public function batch(array $operations, bool $atomic = false): array
+    {
+        return $this->post('/api/v1/batch', [
+            'atomic'     => $atomic,
+            'operations' => $operations,
+        ]);
+    }
+
+    /**
+     * Compute full-dataset server-side KPI stats (SUM, AVG, MIN, MAX, COUNT) for a custom report view.
+     *
+     * @param  string      $slug   Report route slug
+     * @param  string|null $column Optional visible column alias
+     * @return array
+     */
+    public function reportKpi(string $slug, ?string $column = null): array
+    {
+        $params = $column ? ['column' => $column] : [];
+        return $this->get('/api/v1/reports/' . rawurlencode($slug) . '/kpi', $params);
+    }
+
+    // ─── MCP Server (JSON-RPC 2.0 for AI Agents - v2.5.0+) ───────────────
+
+    /**
+     * Call the Data Builder MCP Server (`POST /api/v1/mcp`) using JSON-RPC 2.0.
+     *
+     * Supported methods:
+     *   - 'initialize'
+     *   - 'ping'
+     *   - 'tools/list'
+     *   - 'tools/call'     (params: ['name' => '...', 'arguments' => [...]])
+     *   - 'resources/list'
+     *   - 'resources/read' (params: ['uri' => 'perfex://...'])
+     *   - 'prompts/list'
+     *   - 'prompts/get'    (params: ['name' => '...', 'arguments' => [...]])
+     *
+     * @param  string     $rpc_method JSON-RPC method name
+     * @param  array      $params     Method parameters
+     * @param  bool       $dry_run    When true, simulates write mutations in sandbox mode
+     * @param  int|string $id         JSON-RPC request ID
+     * @return array
+     */
+    public function mcp(string $rpc_method, array $params = [], bool $dry_run = false, $id = 1): array
+    {
+        $payload = [
+            'jsonrpc' => '2.0',
+            'id'      => $id,
+            'method'  => $rpc_method,
+            'params'  => !empty($params) ? $params : new \stdClass(),
+        ];
+        $extra_headers = $dry_run ? ['X-Dry-Run: true'] : [];
+        return $this->post('/api/v1/mcp', $payload, null, $extra_headers);
     }
 
     // ─── GraphQL ─────────────────────────────────────────────────────────
@@ -127,18 +199,22 @@ class ApiSampleClient
     /**
      * Execute an HTTP request via cURL.
      *
-     * @param  string      $method  HTTP method
-     * @param  string      $url     Full URL
-     * @param  string|null $body    Request body (JSON)
+     * @param  string      $method        HTTP method
+     * @param  string      $url           Full URL
+     * @param  string|null $body          Request body (JSON)
+     * @param  array       $extra_headers Optional additional HTTP headers
      * @return array
      */
-    private function request(string $method, string $url, ?string $body = null): array
+    private function request(string $method, string $url, ?string $body = null, array $extra_headers = []): array
     {
         $headers = [
             'Authorization: Bearer ' . $this->token,
             'Content-Type: application/json',
             'Accept: application/json',
         ];
+        if (!empty($extra_headers)) {
+            $headers = array_merge($headers, $extra_headers);
+        }
 
         // HMAC signing
         if (!empty($this->hmac_secret)) {

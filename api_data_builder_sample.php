@@ -2,15 +2,15 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 /*
 Module Name: API Data Builder Sample
-Description: Sample/showcase module demonstrating how to use Data Builder REST API, GraphQL, and Webhooks to perform CRUD operations on Perfex CRM data. Provides interactive demos with live code examples for customers who purchase the Data Builder module.
-Version: 1.0.0
+Description: Sample/showcase module demonstrating how to use Data Builder REST API, GraphQL, MCP Server (AI Agents: Claude, Gemini, DeepSeek, Cursor, n8n), and Webhooks 2.0 to perform CRUD and BI operations on Perfex CRM data.
+Version: 1.1.0
 Requires at least: 3.0.0
 Author: PolyXGO
 Author URI: https://codecanyon.net/user/polyxgo
 */
 
 define('API_SAMPLE_MODULE', 'api_data_builder_sample');
-define('API_SAMPLE_VERSION', '1.0.0');
+define('API_SAMPLE_VERSION', '1.1.0');
 
 /**
  * Register activation hook
@@ -52,15 +52,28 @@ class Api_data_builder_sample_module
         if (is_admin() || has_permission(API_SAMPLE_MODULE, '', 'view')) {
             $CI = &get_instance();
 
+            if ($CI->db->table_exists(db_prefix() . 'modules')) {
+                $row = $CI->db->select('installed_version')
+                    ->where('module_name', API_SAMPLE_MODULE)
+                    ->get(db_prefix() . 'modules')
+                    ->row();
+                if ($row && $row->installed_version !== API_SAMPLE_VERSION) {
+                    require_once(__DIR__ . '/install.php');
+                    $CI->db->where('module_name', API_SAMPLE_MODULE)->update(db_prefix() . 'modules', [
+                        'installed_version' => API_SAMPLE_VERSION,
+                    ]);
+                }
+            }
+
             $CI->app_menu->add_sidebar_menu_item(API_SAMPLE_MODULE, [
-                'name'     => 'API Samples',
+                'name'     => _l('api_sample_menu_title'),
                 'icon'     => 'fa fa-plug',
                 'position' => 8,
             ]);
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
                 'slug'     => 'api_sample_dashboard',
-                'name'     => 'Dashboard',
+                'name'     => _l('api_sample_dashboard'),
                 'icon'     => 'fa fa-tachometer',
                 'href'     => admin_url('api_data_builder_sample'),
                 'position' => 1,
@@ -68,7 +81,7 @@ class Api_data_builder_sample_module
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
                 'slug'     => 'api_sample_rest',
-                'name'     => 'REST API',
+                'name'     => _l('api_sample_rest'),
                 'icon'     => 'fa fa-exchange',
                 'href'     => admin_url('api_data_builder_sample/rest'),
                 'position' => 2,
@@ -76,18 +89,26 @@ class Api_data_builder_sample_module
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
                 'slug'     => 'api_sample_graphql',
-                'name'     => 'GraphQL',
+                'name'     => _l('api_sample_graphql'),
                 'icon'     => 'fa fa-share-alt',
                 'href'     => admin_url('api_data_builder_sample/graphql'),
                 'position' => 3,
             ]);
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
+                'slug'     => 'api_sample_mcp',
+                'name'     => _l('api_sample_mcp'),
+                'icon'     => 'fa fa-microchip',
+                'href'     => admin_url('api_data_builder_sample/mcp'),
+                'position' => 4,
+            ]);
+
+            $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [
                 'slug'     => 'api_sample_webhooks',
-                'name'     => 'Webhooks',
+                'name'     => _l('api_sample_webhooks'),
                 'icon'     => 'fa fa-rss',
                 'href'     => admin_url('api_data_builder_sample/webhooks'),
-                'position' => 4,
+                'position' => 5,
             ]);
 
             $CI->app_menu->add_sidebar_children_item(API_SAMPLE_MODULE, [

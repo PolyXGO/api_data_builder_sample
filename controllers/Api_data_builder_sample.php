@@ -27,7 +27,7 @@ class Api_data_builder_sample extends AdminController
     public function index()
     {
         $data = [
-            'title'         => 'API Data Builder Sample — Dashboard',
+            'title'         => 'API Data Builder Sample - Dashboard',
             'api'           => $this->api,
             'is_configured' => $this->api->isConfigured(),
         ];
@@ -43,7 +43,7 @@ class Api_data_builder_sample extends AdminController
         $action   = $this->input->get('action') ?: 'list';
 
         $data = [
-            'title'    => 'REST API Demos — ' . ucfirst($resource),
+            'title'    => 'REST API Demos - ' . ucfirst($resource),
             'api'      => $this->api,
             'resource' => $resource,
             'action'   => $action,
@@ -73,6 +73,23 @@ class Api_data_builder_sample extends AdminController
         }
 
         $this->load->view('api_data_builder_sample/admin/graphql', $data);
+    }
+
+    // ─── MCP Server (AI Agents) Demos ────────────────────────────────────
+
+    public function mcp()
+    {
+        $data = [
+            'title' => 'MCP Server (AI Agents) Demos',
+            'api'   => $this->api,
+        ];
+
+        if (!$this->api->isConfigured()) {
+            set_alert('warning', 'Please configure API settings first.');
+            redirect(admin_url('api_data_builder_sample/settings'));
+        }
+
+        $this->load->view('api_data_builder_sample/admin/mcp', $data);
     }
 
     // ─── Webhooks ────────────────────────────────────────────────────────
@@ -117,7 +134,7 @@ class Api_data_builder_sample extends AdminController
         }
 
         $data = [
-            'title'            => 'API Sample — Settings',
+            'title'            => 'API Sample - Settings',
             'is_demo_site'     => $_is_demo_site,
             'is_primary_admin' => $_is_primary_admin,
         ];
@@ -139,10 +156,12 @@ class Api_data_builder_sample extends AdminController
 
         header('Content-Type: application/json');
 
-        $method   = strtoupper($this->input->post('method') ?: 'GET');
-        $endpoint = $this->input->post('endpoint') ?: '';
-        $body     = $this->input->post('body') ?: '';
-        $query    = $this->input->post('query_params') ?: '';
+        $method          = strtoupper($this->input->post('method') ?: 'GET');
+        $endpoint        = $this->input->post('endpoint') ?: '';
+        $body            = $this->input->post('body') ?: '';
+        $query           = $this->input->post('query_params') ?: '';
+        $idempotency_key = $this->input->post('idempotency_key') ?: null;
+        $dry_run         = (bool) $this->input->post('dry_run');
 
         if (empty($endpoint)) {
             echo json_encode(['success' => false, 'error' => 'Endpoint is required.']);
@@ -154,6 +173,8 @@ class Api_data_builder_sample extends AdminController
             $endpoint .= (strpos($endpoint, '?') !== false ? '&' : '?') . $query;
         }
 
+        $extra_headers = $dry_run ? ['X-Dry-Run: true'] : [];
+
         $result = null;
         switch ($method) {
             case 'GET':
@@ -161,7 +182,7 @@ class Api_data_builder_sample extends AdminController
                 break;
             case 'POST':
                 $payload = !empty($body) ? json_decode($body, true) : [];
-                $result  = $this->api->post($endpoint, $payload ?: []);
+                $result  = $this->api->post($endpoint, $payload ?: [], $idempotency_key, $extra_headers);
                 break;
             case 'PUT':
                 $payload = !empty($body) ? json_decode($body, true) : [];

@@ -80,7 +80,7 @@
                     <div class="panel-body">
                         <h5 class="no-margin" style="margin-bottom:10px;">
                             <i class="fa fa-table"></i> Result Data
-                            <span class="label label-default pull-right" id="gqlStatus">—</span>
+                            <span class="label label-default pull-right" id="gqlStatus">-</span>
                         </h5>
                         <div id="gqlTableContainer" style="max-height:400px; overflow:auto;">
                             <p class="text-muted text-center" style="padding:30px;">Execute a query to see results here.</p>
@@ -186,7 +186,7 @@ async function executeGraphQL() {
 
     document.getElementById('gqlRawResponse').textContent = res.raw || JSON.stringify(res, null, 2);
     var statusEl = document.getElementById('gqlStatus');
-    statusEl.textContent = res.status || '—';
+    statusEl.textContent = res.status || '-';
     statusEl.className = 'label ' + (res.success ? 'label-success' : 'label-danger');
 
     var gqlData = res.data || {};
@@ -212,7 +212,7 @@ async function executeGraphQL() {
 
 function renderGqlTable(key, rows) {
     var cols = Object.keys(rows[0]);
-    var html = '<p class="text-muted" style="font-size:11px;margin-bottom:5px;"><strong>' + key + '</strong> — ' + rows.length + ' rows</p>';
+    var html = '<p class="text-muted" style="font-size:11px;margin-bottom:5px;"><strong>' + key + '</strong> - ' + rows.length + ' rows</p>';
     html += '<table class="table table-striped table-condensed" style="font-size:12px;">';
     html += '<thead><tr>';
     cols.forEach(function(c) { html += '<th>' + c + '</th>'; });
@@ -227,7 +227,7 @@ function renderGqlTable(key, rows) {
 }
 
 function updateGqlSampleCode(query, variables) {
-    var code = '// PHP — Using ApiSampleClient\n$client = new ApiSampleClient();\n\n';
+    var code = '// PHP - Using ApiSampleClient\n$client = new ApiSampleClient();\n\n';
     code += "$query = <<<'GQL'\n" + query + "\nGQL;\n\n";
     if (Object.keys(variables).length > 0) {
         code += '$variables = ' + JSON.stringify(variables, null, 2) + ';\n';

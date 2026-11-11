@@ -4,3 +4,13 @@ _private_note/
 # HeraSpec agent files (internal development only)
 heraspec/
 AGENTS.heraspec.md
+
+# Internal deployment & build scripts
+deploy.ps1
+deploy.sh
+dist/
+
+# Test & scratch directories
+test/
+tests/
+scratch/
